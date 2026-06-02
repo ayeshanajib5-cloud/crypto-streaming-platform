@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crypto-producer
+  namespace: crypto-streaming
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: crypto-producer
+
+  template:
+    metadata:
+      labels:
+        app: crypto-producer
+
+    spec:
+      containers:
+        - name: crypto-producer
+          image: crypto-streaming-platform-producer:latest
+          imagePullPolicy: Never
+
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:9092
+
+            - name: KAFKA_TOPIC
+              value: crypto-prices

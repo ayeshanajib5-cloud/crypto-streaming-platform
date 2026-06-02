@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-streaming
+  namespace: crypto-streaming
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: spark-streaming
+
+  template:
+    metadata:
+      labels:
+        app: spark-streaming
+
+    spec:
+      containers:
+        - name: spark-streaming
+          image: crypto-streaming-platform-spark:latest
+          imagePullPolicy: Never
+
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:9092
+
+            - name: KAFKA_TOPIC
+              value: crypto-prices
+
+            - name: POSTGRES_DB
+              value: crypto_db
+
+            - name: POSTGRES_USER
+              value: crypto_user
+
+            - name: POSTGRES_PASSWORD
+              value: crypto_password
+
+            - name: POSTGRES_HOST
+              value: postgres
+
+            - name: POSTGRES_PORT
+              value: "5432"
