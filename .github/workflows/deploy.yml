@@ -1,17 +1,59 @@
-name: Deployment Pipeline
+name: AWS EKS Deployment Pipeline
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy-placeholder:
+  deploy:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: infra
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deployment placeholder
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure EKS kubeconfig
         run: |
-          echo "Deployment pipeline placeholder"
-          echo "AWS EKS deployment will be added after Terraform and ECR setup"
+          aws eks update-kubeconfig \
+            --region eu-west-1 \
+            --name crypto-streaming-eks
+
+      - name: Verify Kubernetes connection
+        run: kubectl get nodes
+
+      - name: Build API image
+        run: docker build -t crypto-api ../api
+
+      - name: Build Producer image
+        run: docker build -t crypto-producer ../producer
+
+      - name: Build Spark image
+        run: docker build -t crypto-spark ../streaming
+
+      - name: Deployment pipeline ready
+        run: echo "Terraform and Kubernetes deployment pipeline configured successfully"
