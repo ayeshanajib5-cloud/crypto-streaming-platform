@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS crypto_prices (
+    id SERIAL PRIMARY KEY,
+    symbol VARCHAR(50) NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    price DOUBLE PRECISION NOT NULL,
+    event_time TIMESTAMP,
+    source VARCHAR(50),
+    processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
