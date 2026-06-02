@@ -22,9 +22,6 @@ spec:
           image: crypto-streaming-platform-producer:latest
           imagePullPolicy: Never
 
-          env:
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: kafka:9092
-
-            - name: KAFKA_TOPIC
-              value: crypto-prices
+          envFrom:
+            - configMapRef:
+                name: crypto-config

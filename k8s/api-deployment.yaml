@@ -19,9 +19,7 @@ spec:
     spec:
       containers:
         - name: crypto-api
-
           image: crypto-streaming-platform-api:latest
-
           imagePullPolicy: Never
 
           ports:
@@ -29,31 +27,31 @@ spec:
 
           env:
             - name: POSTGRES_DB
-              value: crypto_db
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
 
             - name: POSTGRES_USER
-              value: crypto_user
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
 
             - name: POSTGRES_PASSWORD
-              value: crypto_password
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
 
-            - name: POSTGRES_HOST
-              value: postgres
-
-            - name: POSTGRES_PORT
-              value: "5432"
-
-            - name: REDIS_HOST
-              value: redis
-
-            - name: REDIS_PORT
-              value: "6379"
+          envFrom:
+            - configMapRef:
+                name: crypto-config
 
           livenessProbe:
             httpGet:
               path: /health
               port: 8000
-
             initialDelaySeconds: 30
             periodSeconds: 10
 
@@ -61,7 +59,6 @@ spec:
             httpGet:
               path: /health
               port: 8000
-
             initialDelaySeconds: 10
             periodSeconds: 5
 
@@ -69,7 +66,6 @@ spec:
             requests:
               memory: "256Mi"
               cpu: "250m"
-
             limits:
               memory: "512Mi"
               cpu: "500m"

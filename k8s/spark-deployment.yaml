@@ -23,23 +23,24 @@ spec:
           imagePullPolicy: Never
 
           env:
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: kafka:9092
-
-            - name: KAFKA_TOPIC
-              value: crypto-prices
-
             - name: POSTGRES_DB
-              value: crypto_db
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
 
             - name: POSTGRES_USER
-              value: crypto_user
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
 
             - name: POSTGRES_PASSWORD
-              value: crypto_password
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
 
-            - name: POSTGRES_HOST
-              value: postgres
-
-            - name: POSTGRES_PORT
-              value: "5432"
+          envFrom:
+            - configMapRef:
+                name: crypto-config
