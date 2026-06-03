@@ -1,5 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: grafana
   namespace: crypto-streaming
@@ -19,6 +20,26 @@ spec:
     spec:
       containers:
         - name: grafana
+
           image: grafana/grafana
+
           ports:
             - containerPort: 3000
+
+          volumeMounts:
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+      volumes:
+        - name: grafana-storage
+          persistentVolumeClaim:
+            claimName: grafana-data
