@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: crypto-api
-          image: crypto-streaming-platform-api:latest
-          imagePullPolicy: Never
+          image: 504429674609.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 8000

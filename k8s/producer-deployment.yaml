@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: crypto-producer
-          image: crypto-streaming-platform-producer:latest
-          imagePullPolicy: Never
+          image: 504429674609.dkr.ecr.us-east-1.amazonaws.com/crypto-producer:latest
+          imagePullPolicy: Always
 
           envFrom:
             - configMapRef:

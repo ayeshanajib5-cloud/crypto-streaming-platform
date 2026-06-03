@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: airflow-webserver
-          image: crypto-streaming-platform-airflow:latest
-          imagePullPolicy: Never
+          image: 504429674609.dkr.ecr.us-east-1.amazonaws.com/crypto-airflow:latest
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 8080

@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: spark-streaming
-          image: crypto-streaming-platform-spark:latest
-          imagePullPolicy: Never
+          image: 504429674609.dkr.ecr.us-east-1.amazonaws.com/crypto-spark:latest
+          imagePullPolicy: Always
 
           env:
             - name: POSTGRES_DB
