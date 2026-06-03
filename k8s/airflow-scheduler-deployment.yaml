@@ -19,16 +19,19 @@ spec:
     spec:
       containers:
         - name: airflow-scheduler
-          image: crypto-streaming-platform-airflow:latest
-          imagePullPolicy: Never
+          image: 504429674609.dkr.ecr.us-east-1.amazonaws.com/crypto-airflow:latest
+          imagePullPolicy: Always
 
           env:
             - name: AIRFLOW__CORE__EXECUTOR
               value: SequentialExecutor
+
             - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
               value: sqlite:////opt/airflow/airflow.db
+
             - name: AIRFLOW__CORE__LOAD_EXAMPLES
               value: "false"
+
             - name: AIRFLOW__WEBSERVER__SECRET_KEY
               value: airflow_secret_key
 
