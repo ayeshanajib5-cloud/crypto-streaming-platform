@@ -1,15 +1,19 @@
-name: AWS EKS Deployment Pipeline
+name: Deploy to AWS EKS
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: eu-west-1
+  AWS_ACCOUNT_ID: 504429674609
+  EKS_CLUSTER_NAME: crypto-streaming-eks
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: infra
 
     steps:
       - name: Checkout repository
@@ -20,40 +24,49 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
-        run: terraform plan
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Configure EKS kubeconfig
+      - name: Build and push API image
         run: |
-          aws eks update-kubeconfig \
-            --region eu-west-1 \
-            --name crypto-streaming-eks
+          docker build -t crypto-api ./api
+          docker tag crypto-api:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
 
-      - name: Verify Kubernetes connection
-        run: kubectl get nodes
+      - name: Build and push Producer image
+        run: |
+          docker build -t crypto-producer ./producer
+          docker tag crypto-producer:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-producer:latest
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-producer:latest
 
-      - name: Build API image
-        run: docker build -t crypto-api ../api
+      - name: Build and push Spark image
+        run: |
+          docker build -t crypto-spark ./streaming
+          docker tag crypto-spark:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-spark:latest
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-spark:latest
 
-      - name: Build Producer image
-        run: docker build -t crypto-producer ../producer
+      - name: Build and push Airflow image
+        run: |
+          docker build -t crypto-airflow ./airflow
+          docker tag crypto-airflow:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-airflow:latest
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-airflow:latest
 
-      - name: Build Spark image
-        run: docker build -t crypto-spark ../streaming
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
 
-      - name: Deployment pipeline ready
-        run: echo "Terraform and Kubernetes deployment pipeline configured successfully"
+      - name: Deploy Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/
+          kubectl rollout restart deployment crypto-api -n crypto-streaming
+          kubectl rollout restart deployment crypto-producer -n crypto-streaming
+          kubectl rollout restart deployment spark-streaming -n crypto-streaming
+          kubectl rollout restart deployment airflow-webserver -n crypto-streaming
+          kubectl rollout restart deployment airflow-scheduler -n crypto-streaming
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n crypto-streaming
+          kubectl get svc -n crypto-streaming
