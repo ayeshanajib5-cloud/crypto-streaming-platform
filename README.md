@@ -543,7 +543,7 @@ Provides:
 
 ## Platform Architecture Diagram
 
-![Architecture](images/architecture.png)
+![Architecture](images/architechture.png)
 
 ---
 
