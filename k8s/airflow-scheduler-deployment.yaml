@@ -1,5 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: airflow-scheduler
   namespace: crypto-streaming
@@ -36,5 +37,8 @@ spec:
               value: airflow_secret_key
 
           command:
-            - airflow
-            - scheduler
+            - bash
+            - -c
+            - |
+              airflow db migrate &&
+              airflow scheduler
