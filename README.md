@@ -349,23 +349,6 @@ docker ps
 
 ---
 
-# 🔐 Default Credentials
-
-## Grafana
-
-```text
-Username: admin
-Password: admin
-```
-
-## Airflow
-
-```text
-Username: admin
-Password: admin
-```
-
----
 
 # ☸️ Kubernetes Components
 
