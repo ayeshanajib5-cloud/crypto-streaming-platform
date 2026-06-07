@@ -211,23 +211,13 @@ crypto-streaming-platform/
 
 # 🌍 Live Deployment
 
-The platform is deployed on Amazon EKS and exposed through Kubernetes LoadBalancer services.
+# Live Deployment
 
-### Main Application
+The cloud infrastructure was deployed and validated during project execution.
 
-http://af47a0a3b1a06481cb61d8c60c6bf9f2-1378678979.eu-west-1.elb.amazonaws.com
+The public AWS Load Balancer endpoint used during deployment is no longer active because the infrastructure was intentionally destroyed after validation to avoid ongoing cloud costs.
 
-### API Documentation (Swagger UI)
-
-http://af47a0a3b1a06481cb61d8c60c6bf9f2-1378678979.eu-west-1.elb.amazonaws.com/docs
-
-### Health Check Endpoint
-
-http://af47a0a3b1a06481cb61d8c60c6bf9f2-1378678979.eu-west-1.elb.amazonaws.com/health
-
-### Latest Prices Endpoint
-
-http://af47a0a3b1a06481cb61d8c60c6bf9f2-1378678979.eu-west-1.elb.amazonaws.com/prices/latest
+Application screenshots and deployment evidence are provided below.
 
 ### Metrics Endpoint
 
