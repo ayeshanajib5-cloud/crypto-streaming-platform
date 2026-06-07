@@ -7,13 +7,37 @@ on:
       - main
 
 env:
-  AWS_REGION: eu-west-1
-  AWS_ACCOUNT_ID: 504429674609
+  AWS_REGION: us-east-1
   EKS_CLUSTER_NAME: crypto-streaming-eks
 
 jobs:
-  deploy:
+  test:
+    name: Run API Tests
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install API dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r api/requirements.txt
+          pip install pytest httpx
+
+      - name: Run FastAPI tests
+        run: |
+          pytest api/tests/
+
+  build:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: test
 
     steps:
       - name: Checkout repository
@@ -29,29 +53,48 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
+
       - name: Build and push API image
         run: |
           docker build -t crypto-api ./api
-          docker tag crypto-api:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
+          docker tag crypto-api:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
 
       - name: Build and push Producer image
         run: |
           docker build -t crypto-producer ./producer
-          docker tag crypto-producer:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-producer:latest
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-producer:latest
+          docker tag crypto-producer:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/crypto-producer:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/crypto-producer:latest
 
       - name: Build and push Spark image
         run: |
           docker build -t crypto-spark ./streaming
-          docker tag crypto-spark:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-spark:latest
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-spark:latest
+          docker tag crypto-spark:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/crypto-spark:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/crypto-spark:latest
 
       - name: Build and push Airflow image
         run: |
           docker build -t crypto-airflow ./airflow
-          docker tag crypto-airflow:latest $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-airflow:latest
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/crypto-airflow:latest
+          docker tag crypto-airflow:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/crypto-airflow:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/crypto-airflow:latest
+
+  deploy:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Configure kubectl for EKS
         run: |
