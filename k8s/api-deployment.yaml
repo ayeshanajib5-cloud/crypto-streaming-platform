@@ -17,9 +17,10 @@ spec:
         app: crypto-api
 
     spec:
+      serviceAccountName: crypto-api-sa
       containers:
         - name: crypto-api
-          image: 504429674609.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
+          image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/crypto-api:latest
           imagePullPolicy: Always
 
           ports:

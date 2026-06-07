@@ -17,6 +17,7 @@ spec:
         app: crypto-producer
 
     spec:
+      serviceAccountName: crypto-producer-sa  
       containers:
         - name: crypto-producer
           image: 504429674609.dkr.ecr.us-east-1.amazonaws.com/crypto-producer:latest
