@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "crypto-streaming-terraform-state-504429674609"
+  bucket = "crypto-streaming-terraform-state"
 }
 
 resource "aws_s3_bucket_versioning" "terraform_state_versioning" {
