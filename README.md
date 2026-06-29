@@ -378,9 +378,17 @@ GitHub Actions automates:
 ### Continuous Integration
 
 - Source code validation
+- API and producer unit tests
 - Docker image builds
 - Infrastructure validation
 - Kubernetes manifest validation
+
+### Local Test Command
+
+```bash
+python -m pip install -r requirements-dev.txt
+pytest api/tests producer/tests -q
+```
 
 ### Continuous Delivery
 

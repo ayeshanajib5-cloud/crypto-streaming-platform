@@ -3,7 +3,6 @@ import time
 from datetime import datetime, timezone
 
 import requests
-from kafka import KafkaProducer
 
 from config import (
     KAFKA_BOOTSTRAP_SERVERS,
@@ -16,6 +15,8 @@ from config import (
 
 
 def create_kafka_producer():
+    from kafka import KafkaProducer
+
     while True:
         try:
             producer = KafkaProducer(
